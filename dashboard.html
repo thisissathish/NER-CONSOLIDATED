@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NER Smart Logistics - Live Dashboard</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0a0e27; color: #fff; }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        .header h1 { font-size: 1.5rem; margin-bottom: 0.3rem; }
+        .header p { font-size: 0.9rem; opacity: 0.9; }
+
+        .container { display: grid; grid-template-columns: 1fr 2fr; gap: 1rem; padding: 1rem; height: calc(100vh - 100px); }
+
+        .panel {
+            background: #1a1f3a;
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            overflow-y: auto;
+        }
+
+        .panel h2 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: #667eea;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 0.5rem;
+        }
+
+        #map { height: 100%; border-radius: 8px; }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+        }
+        .stat-card h3 { font-size: 2rem; margin-bottom: 0.3rem; }
+        .stat-card p { font-size: 0.9rem; opacity: 0.9; }
+
+        .risk-item {
+            background: #252b4a;
+            padding: 0.8rem;
+            border-radius: 6px;
+            margin-bottom: 0.8rem;
+            border-left: 4px solid;
+        }
+        .risk-critical { border-left-color: #ef4444; }
+        .risk-high { border-left-color: #f59e0b; }
+        .risk-medium { border-left-color: #eab308; }
+        .risk-low { border-left-color: #22c55e; }
+
+        .risk-item strong { display: block; margin-bottom: 0.3rem; font-size: 1rem; }
+        .risk-item span { font-size: 0.85rem; opacity: 0.8; }
+
+        .vehicle {
+            background: #252b4a;
+            padding: 0.6rem;
+            border-radius: 4px;
+            margin-bottom: 0.6rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .vehicle-active { border-left: 3px solid #22c55e; }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            font-size: 1.2rem;
+            color: #667eea;
+        }
+
+        .route-info {
+            background: #252b4a;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-top: 1rem;
+        }
+        .route-info h3 { margin-bottom: 0.5rem; color: #667eea; }
+        .route-metric {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.4rem 0;
+            border-bottom: 1px solid #1a1f3a;
+        }
+        .route-metric:last-child { border-bottom: none; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚛 NER Smart Logistics & Accessibility Intelligence Platform</h1>
+        <p>Smart India Hackathon 2026 | AI-Powered Route Optimization for North Eastern Region</p>
+    </div>
+
+    <div class="container">
+        <div class="panel">
+            <h2>📊 System Status</h2>
+            <div class="stat-card">
+                <h3 id="totalRoads">-</h3>
+                <p>Road Segments Monitored</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="activeVehicles">-</h3>
+                <p>Active Vehicles</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="avgRisk">-</h3>
+                <p>Average Risk Level</p>
+            </div>
+
+            <h2>⚠️ High Risk Segments</h2>
+            <div id="riskList" class="loading">Loading...</div>
+
+            <h2>🚚 Active Vehicles</h2>
+            <div id="vehicleList" class="loading">Loading...</div>
+        </div>
+
+        <div class="panel">
+            <h2>🗺️ Live Risk Map - Guwahati to Shillong Corridor</h2>
+            <div id="map"></div>
+            <div class="route-info" id="routeInfo" style="display:none;">
+                <h3>Optimized Route (Balanced Mode)</h3>
+                <div class="route-metric">
+                    <span>Total Distance:</span>
+                    <strong id="routeDistance">-</strong>
+                </div>
+                <div class="route-metric">
+                    <span>Estimated Time:</span>
+                    <strong id="routeTime">-</strong>
+                </div>
+                <div class="route-metric">
+                    <span>Average Risk:</span>
+                    <strong id="routeRisk">-</strong>
+                </div>
+                <div class="route-metric">
+                    <span>Max Risk Segment:</span>
+                    <strong id="routeMaxRisk">-</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const API_BASE = 'http://localhost:8000';
+
+        // Initialize map
+        const map = L.map('map').setView([25.85, 91.85], 9);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        let roadsLayer = L.layerGroup().addTo(map);
+        let markersLayer = L.layerGroup().addTo(map);
+
+        // Color by risk
+        function getRiskColor(risk) {
+            if (risk > 0.06) return '#ef4444'; // critical
+            if (risk > 0.03) return '#f59e0b'; // high
+            if (risk > 0.01) return '#eab308'; // medium
+            return '#22c55e'; // low
+        }
+
+        function getRiskLabel(risk) {
+            if (risk > 0.06) return 'CRITICAL';
+            if (risk > 0.03) return 'HIGH';
+            if (risk > 0.01) return 'MEDIUM';
+            return 'LOW';
+        }
+
+        // Load risk scores
+        async function loadRiskScores() {
+            try {
+                const res = await fetch(`${API_BASE}/risk/scores`);
+                const scores = await res.json();
+
+                // Update stats
+                document.getElementById('totalRoads').textContent = scores.length;
+                const avgRisk = scores.reduce((a, b) => a + b.risk_probability, 0) / scores.length;
+                document.getElementById('avgRisk').textContent = (avgRisk * 100).toFixed(2) + '%';
+
+                // Update risk list
+                const topRisks = scores.slice(0, 5);
+                document.getElementById('riskList').innerHTML = topRisks.map(s => `
+                    <div class="risk-item risk-${s.risk_category}">
+                        <strong>Segment #${s.segment_id}</strong>
+                        <span>Risk: ${(s.risk_probability * 100).toFixed(2)}% | ${s.risk_category.toUpperCase()}</span>
+                    </div>
+                `).join('');
+
+                return scores;
+            } catch (e) {
+                console.error('Failed to load risk scores:', e);
+                return [];
+            }
+        }
+
+        // Load roads and plot on map
+        async function loadRoads() {
+            try {
+                const res = await fetch(`${API_BASE}/roads`);
+                const roads = await res.json();
+
+                roadsLayer.clearLayers();
+
+                // Get risk scores
+                const riskRes = await fetch(`${API_BASE}/risk/scores`);
+                const risks = await riskRes.json();
+                const riskMap = {};
+                risks.forEach(r => riskMap[r.segment_id] = r.risk_probability);
+
+                roads.forEach(road => {
+                    const risk = riskMap[road.id] || 0;
+                    const color = getRiskColor(risk);
+
+                    // For now, draw straight lines (real geometry would need PostGIS output)
+                    // In production, you'd use road.geometry from PostGIS
+                    L.polyline([
+                        [road.from_node?.latitude || 26, road.from_node?.longitude || 91],
+                        [road.to_node?.latitude || 26, road.to_node?.longitude || 91]
+                    ], {
+                        color: color,
+                        weight: 4,
+                        opacity: 0.8
+                    }).bindPopup(`
+                        <b>${road.road_name || 'Road #' + road.id}</b><br>
+                        Distance: ${road.distance_km} km<br>
+                        Terrain: ${road.terrain}<br>
+                        Risk: ${(risk * 100).toFixed(2)}% (${getRiskLabel(risk)})
+                    `).addTo(roadsLayer);
+                });
+
+                return roads;
+            } catch (e) {
+                console.error('Failed to load roads:', e);
+                return [];
+            }
+        }
+
+        // Load vehicles
+        async function loadVehicles() {
+            try {
+                const res = await fetch(`${API_BASE}/vehicles`);
+                const vehicles = await res.json();
+
+                document.getElementById('activeVehicles').textContent = vehicles.filter(v => v.is_active).length;
+
+                document.getElementById('vehicleList').innerHTML = vehicles.map(v => `
+                    <div class="vehicle ${v.is_active ? 'vehicle-active' : ''}">
+                        <div>
+                            <strong>${v.registration_number}</strong><br>
+                            <span style="font-size:0.85rem;">${v.vehicle_type} | ${v.operator}</span>
+                        </div>
+                        <div style="color: ${v.is_active ? '#22c55e' : '#666'};">
+                            ${v.is_active ? '● ACTIVE' : '○ Inactive'}
+                        </div>
+                    </div>
+                `).join('');
+
+                return vehicles;
+            } catch (e) {
+                console.error('Failed to load vehicles:', e);
+                return [];
+            }
+        }
+
+        // Load and display route
+        async function loadRoute() {
+            try {
+                // Get first and last node IDs from roads
+                const roadsRes = await fetch(`${API_BASE}/roads`);
+                const roads = await roadsRes.json();
+
+                if (roads.length < 2) return;
+
+                const fromNode = roads[0].from_node_id;
+                const toNode = roads[roads.length - 1].to_node_id;
+
+                const res = await fetch(`${API_BASE}/route?from_node_id=${fromNode}&to_node_id=${toNode}&mode=balanced`);
+                const route = await res.json();
+
+                document.getElementById('routeInfo').style.display = 'block';
+                document.getElementById('routeDistance').textContent = route.total_distance_km + ' km';
+                document.getElementById('routeTime').textContent = route.estimated_time_minutes + ' min';
+                document.getElementById('routeRisk').textContent = (route.average_risk * 100).toFixed(2) + '%';
+                document.getElementById('routeMaxRisk').textContent = (route.max_risk * 100).toFixed(2) + '%';
+
+                return route;
+            } catch (e) {
+                console.error('Failed to load route:', e);
+            }
+        }
+
+        // Initial load
+        Promise.all([
+            loadRiskScores(),
+            loadRoads(),
+            loadVehicles(),
+            loadRoute()
+        ]).then(() => {
+            console.log('Dashboard loaded successfully');
+        });
+
+        // Auto-refresh every 30 seconds
+        setInterval(() => {
+            loadRiskScores();
+            loadVehicles();
+        }, 30000);
+    </script>
+</body>
+</html>

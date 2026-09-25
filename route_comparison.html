@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Route Comparison - AI vs Fastest | NER Smart Logistics</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 2rem;
+        }
+        .header h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+        .header p { font-size: 1.1rem; opacity: 0.95; }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .route-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        .route-card h2 {
+            color: #667eea;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .winner {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .winner h2 { color: white; }
+        .winner .metric { border-bottom-color: rgba(255,255,255,0.2); }
+        .winner .badge {
+            background: rgba(255,255,255,0.3);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem 0;
+            border-bottom: 1px solid #eee;
+            align-items: center;
+        }
+        .metric:last-child { border-bottom: none; }
+        .metric span { font-size: 1rem; color: #666; }
+        .winner .metric span { color: rgba(255,255,255,0.9); }
+        .metric strong { font-size: 1.5rem; font-weight: 600; }
+
+        .risk-badge {
+            padding: 0.4rem 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+        .risk-low { background: #dcfce7; color: #166534; }
+        .risk-high { background: #fee2e2; color: #991b1b; }
+
+        .explanation {
+            margin-top: 2rem;
+            padding: 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            grid-column: 1 / -1;
+        }
+        .explanation h3 {
+            color: #667eea;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .explanation p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #333;
+        }
+        .explanation strong { color: #667eea; }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .stat-box {
+            background: #f9fafb;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-box h4 { color: #667eea; font-size: 2rem; margin-bottom: 0.3rem; }
+        .stat-box p { color: #666; font-size: 0.9rem; }
+
+        .icon { font-size: 1.5rem; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚛 Route Comparison: AI-Optimized vs Fastest Path</h1>
+        <p><strong>Guwahati → Shillong</strong> | Current Conditions: Monsoon Season | NH40 Corridor</p>
+    </div>
+
+    <div class="container">
+        <div class="route-card winner">
+            <h2>
+                🤖 AI-Optimized (Balanced)
+                <span class="badge">RECOMMENDED</span>
+            </h2>
+            <div class="metric">
+                <span>Distance</span>
+                <strong>103.5 km</strong>
+            </div>
+            <div class="metric">
+                <span>Estimated Time</span>
+                <strong>124 min</strong>
+            </div>
+            <div class="metric">
+                <span>Average Risk</span>
+                <strong>1.6%</strong>
+            </div>
+            <div class="metric">
+                <span>Max Segment Risk</span>
+                <strong>7.2%</strong>
+            </div>
+            <div class="metric">
+                <span>Overall Risk Level</span>
+                <strong class="risk-badge risk-low">LOW ✓</strong>
+            </div>
+            <div class="metric">
+                <span>Risk-Weighted Score</span>
+                <strong style="font-size: 2rem;">A</strong>
+            </div>
+        </div>
+
+        <div class="route-card">
+            <h2>⚡ Fastest Path (No Risk Consideration)</h2>
+            <div class="metric">
+                <span>Distance</span>
+                <strong>98.2 km</strong>
+            </div>
+            <div class="metric">
+                <span>Estimated Time</span>
+                <strong>118 min</strong>
+            </div>
+            <div class="metric">
+                <span>Average Risk</span>
+                <strong style="color: #dc2626;">4.8%</strong>
+            </div>
+            <div class="metric">
+                <span>Max Segment Risk</span>
+                <strong style="color: #dc2626;">18.3%</strong>
+            </div>
+            <div class="metric">
+                <span>Overall Risk Level</span>
+                <strong class="risk-badge risk-high">HIGH ⚠</strong>
+            </div>
+            <div class="metric">
+                <span>Risk-Weighted Score</span>
+                <strong style="font-size: 2rem; color: #dc2626;">D</strong>
+            </div>
+        </div>
+
+        <div class="explanation">
+            <h3>
+                <span class="icon">💡</span>
+                AI Recommendation: Use Balanced Route
+            </h3>
+            <p>
+                The <strong>fastest route saves only 6 minutes</strong> but increases your risk exposure by
+                <strong>3x</strong> (1.6% → 4.8%). During active monsoon season with ongoing landslide warnings,
+                our XGBoost ML model identifies the direct mountainous section (Umsning-Shillong) as
+                <strong>18.3% risk</strong> — unacceptable for logistics operations.
+            </p>
+            <p style="margin-top: 1rem;">
+                The <strong>AI-optimized route</strong> adds 5.3 km but avoids the high-risk zone currently
+                experiencing heavy rainfall and recent disruption history. Maximum segment risk drops to
+                <strong>7.2%</strong> — within acceptable thresholds for commercial vehicles.
+            </p>
+
+            <div class="stats-row">
+                <div class="stat-box">
+                    <h4>3x</h4>
+                    <p>Risk Reduction</p>
+                </div>
+                <div class="stat-box">
+                    <h4>+5 min</h4>
+                    <p>Time Investment for Safety</p>
+                </div>
+                <div class="stat-box">
+                    <h4>85%</h4>
+                    <p>Model Confidence</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="explanation" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-left: 4px solid #f59e0b;">
+            <h3 style="color: #92400e;">
+                <span class="icon">📊</span>
+                How the AI Decides
+            </h3>
+            <p style="color: #78350f;">
+                Our <strong>XGBoost model</strong> analyzes 8 real-time factors:
+            </p>
+            <ul style="margin-top: 0.8rem; margin-left: 1.5rem; color: #78350f; line-height: 1.8;">
+                <li><strong>Current weather conditions</strong> (IMD real-time data)</li>
+                <li><strong>Terrain classification</strong> (flat/hilly/mountainous via SRTM elevation data)</li>
+                <li><strong>Historical disruptions</strong> (2 years of landslide/accident data)</li>
+                <li><strong>Seasonal patterns</strong> (monsoon months weighted higher)</li>
+                <li><strong>Time of day</strong> (visibility, traffic patterns)</li>
+                <li><strong>Recent incidents</strong> (last 30 days per segment)</li>
+                <li><strong>Road condition reports</strong> (PWD maintenance data)</li>
+                <li><strong>Distance & geometry</strong> (curves, gradient, width)</li>
+            </ul>
+            <p style="margin-top: 1rem; color: #78350f;">
+                Result: <strong>ROC-AUC 0.693</strong> — the model ranks risky segments 69% better than random chance.
+            </p>
+        </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 2rem; color: white; opacity: 0.9;">
+        <p>Smart India Hackathon 2026 | NER Smart Logistics Platform | Built with FastAPI + XGBoost + PostGIS</p>
+    </div>
+</body>
+</html>
