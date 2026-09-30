@@ -1,6 +1,6 @@
-# 🚛 NER Smart Logistics Platform
+# 🚛 UrbanFlow AI – Intelligent Urban Transportation, Logistics & Accessibility Platform
 
-**AI-Based Smart Logistics and Accessibility Intelligence Platform for North Eastern Region**
+**An AI-powered platform for intelligent urban transportation, logistics optimization, and accessibility intelligence.**
 
 [![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)]()
 [![Version](https://img.shields.io/badge/Version-2.0-blue)]()

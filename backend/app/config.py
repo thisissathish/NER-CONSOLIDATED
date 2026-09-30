@@ -7,12 +7,12 @@ class Settings(BaseSettings):
     """Application settings."""
 
     # Application
-    app_name: str = "NER Smart Logistics Platform"
-    app_version: str = "1.0.0"
+    app_name: str = "UrbanFlow AI"
+    app_version: str = "2.0.0"
     debug: bool = True
 
     # Database: SQLite by default (zero-docker), or PostgreSQL if configured
-    database_url: str = "sqlite:///./ner_logistics.db"
+    database_url: str = "sqlite:///./urbanflow.db"
 
     # Redis (Optional)
     redis_url: str = "redis://localhost:6379/0"
@@ -20,11 +20,12 @@ class Settings(BaseSettings):
     # OpenWeatherMap (Optional)
     openweathermap_api_key: str = ""
 
-    # Corridor bounds (Guwahati-Shillong)
-    corridor_min_lat: float = 25.5
-    corridor_max_lat: float = 26.2
-    corridor_min_lon: float = 91.5
-    corridor_max_lon: float = 92.0
+    # Default City Bounding Box (Example: Generic Urban Area)
+    default_city_name: str = "DemoCity"
+    city_min_lat: float = 0.0
+    city_max_lat: float = 1.0
+    city_min_lon: float = 0.0
+    city_max_lon: float = 1.0
 
     model_config = SettingsConfigDict(
         env_file=".env",

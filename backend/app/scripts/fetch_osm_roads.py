@@ -27,10 +27,10 @@ def fetch_osm_roads():
 
     # Define bounding box for corridor
     bbox = (
-        settings.corridor_min_lat,
-        settings.corridor_max_lat,
-        settings.corridor_min_lon,
-        settings.corridor_max_lon
+        settings.city_min_lat,
+        settings.city_max_lat,
+        settings.city_min_lon,
+        settings.city_max_lon
     )
 
     print(f"Bounding box: {bbox}")
